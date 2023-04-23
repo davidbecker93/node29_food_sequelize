@@ -69,24 +69,12 @@
 			"response": []
 		},
 		{
-			"name": "getUserId",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
+			"name": "getLikeByUser",
 			"request": {
 				"method": "GET",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"ho_ten\": \"zdfse\",\r\n    \"email\": \"van2288738@gmail.com\",\r\n    \"mat_khau\": \"1234\",\r\n    \"tuoi\": 18\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
 				"url": {
-					"raw": "localhost:8080/api/user/1",
+					"raw": "localhost:8080/api/user/like-user/1",
 					"host": [
 						"localhost"
 					],
@@ -94,6 +82,7 @@
 					"path": [
 						"api",
 						"user",
+						"like-user",
 						"1"
 					]
 				}
