@@ -1,69 +1,68 @@
-//restController with sequelize
-// Find all restaurants and return them as JSON
-router.get('/', async (req, res) => {
-  try {
-    const restaurants = await Restaurant.findAll();
-    res.status(200).json(restaurants);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+const { successCode, errorCode, failCode } = require("../config/reponse.js");
+const sequelize = require("../models/index.js");
+const initModels = require("../models/init-models.js");
+const model = initModels(sequelize);
 
-// Find a restaurant by id and return it as JSON
-router.get('/:id', async (req, res) => {
+const checkUserAndFood = async (user_id, food_id) => {
+  // Check if user exists
+  const userExists = await model.user.findOne({
+    where: {
+      user_id,
+    },
+  });
+
+  // Check if food exists
+  const foodExists = await model.food.findOne({
+    where: {
+      food_id,
+    },
+  });
+
+  return { userExists, foodExists };
+};
+
+const orderFoodfromUser = async (req, res) => {
+  const { user_id, food_id, amount, code, arrSubId } = req.body;
+  const orderCol = {
+    food_id,
+    user_id,
+  };
+
   try {
-    const restaurant = await Restaurant.findByPk(req.params.id);
-    if (restaurant) {
-      res.status(200).json(restaurant);
+    const { userExists, foodExists } = await checkUserAndFood(user_id, food_id);
+
+    // If both user and food exist, add data to the database
+    if (userExists && foodExists) {
+      const orderModel = {
+        ...orderCol,
+        ...(amount && { amount }),
+        ...(code && { code }),
+        ...(arrSubId && { arr_sub_id: arrSubId }),
+      };
+
+      // Check if order exists
+      const orderExists = await model.order.findOne({ where: orderCol });
+
+      // If order exists, update it, otherwise create it
+      if (orderExists) {
+        await model.order.update(
+          {
+            ...orderModel,
+            ...(amount && { amount: orderExists.amount + amount }),
+          },
+          { where: orderCol }
+        );
+      } else {
+        await model.order.create(orderModel);
+      }
+      return successCode(res, "Order food successfully");
     } else {
-      res.status(404).json({ error: 'Restaurant not found' });
+      return failCode(res, "User or food not found!");
     }
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    console.log(error);
+    return errorCode(res);
   }
-});
+};
 
-// Create a new restaurant
-router.post('/', async (req, res) => {
-  try {
-    const restaurant = await Restaurant.create(req.body);
-    res.status(201).json(restaurant);
-  } catch (err) {
-    res.status(422).json({ error: err.message });
-  }
-});
-
-// Update an existing restaurant
-router.put('/:id', async (req, res) => {
-  try {
-    const restaurant = await Restaurant.findByPk(req.params.id);
-    if (restaurant) {
-      await restaurant.update(req.body);
-      res.status(200).json(restaurant);
-    } else {
-      res.status(404).json({ error: 'Restaurant not found' });
-    }
-  } catch (err) {
-    res.status(422).json({ error: err.message });
-  }
-});
-
-// Delete a restaurant
-router.delete('/:id', async (req, res) => {
-  try {
-    const restaurant = await Restaurant.findByPk(req.params.id);
-    if (restaurant) {
-      await restaurant.destroy();
-      res.status(204).send();
-    } else {
-      res.status(404).json({ error: 'Restaurant not found' });
-    }
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Check if the server is running
-router.get('/check', (req, res) => {
-  res.status(200).send('Server is running!');
-});
+module.exports = {orderFoodfromUser}

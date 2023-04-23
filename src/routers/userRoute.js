@@ -1,5 +1,5 @@
 const express = require('express');
-const { getUser, getUserById, loginUser, createUser, updateUser, deleteUser, getLikeById, orderFoodfromUser, getRateById } = require('../controllers/userController');
+const { getUser, getUserById, loginUser, createUser, updateUser, deleteUser, getLikeRes, getLikeByRes, getLikeByUser, getRateRes, getRateByRes, getRateByUser } = require('../controllers/userController');
 const userRouter = express.Router();
 
 userRouter.get('/users', getUser);
@@ -8,8 +8,22 @@ userRouter.post('/login', loginUser);
 userRouter.post('/signup', createUser);
 userRouter.put('/update-user/:id', updateUser);
 userRouter.delete('/delete-user/:id', deleteUser);
-userRouter.post('/rest-like/:id', getLikeById);
-userRouter.post("/order-food", orderFoodfromUser);
-userRouter.get("/rate/:id", getRateById);
+userRouter.post('/like', getLikeRes);
+userRouter.get('/like-rest/:id', getLikeByRes);
+userRouter.get('/like-user/:id', getLikeByUser);
+userRouter.post('/rate', getRateRes);
+userRouter.get('/rate-rest/:id', getRateByRes);
+userRouter.get('/rate-user/:id', getRateByUser);
+
+// Fix: changed all post requests to get requests
+// userRouter.get('/like', getLikeRes);
+// userRouter.get('/like-rest/:id', getLikeByRes);
+// userRouter.get('/like-user/:id', getLikeByUser);
+// userRouter.get('/rate', getRateRes);
+// userRouter.get('/rate-rest/:id', getRateByRes);
+// userRouter.get('/rate-user/:id', getRateByUser);
+
+
+
 
 module.exports = userRouter;

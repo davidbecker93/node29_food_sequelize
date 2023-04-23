@@ -1,8 +1,7 @@
 const express = require('express');
+const { orderFoodfromUser } = require('../controllers/restController');
 const restRouter = express.Router();
 
-restRouter.get('/check', (req, res) => {
-  res.send('Server is up and running!');
-});
+restRouter.get('/order', orderFoodfromUser);
 
 module.exports = restRouter;

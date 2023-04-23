@@ -130,19 +130,27 @@ const loginUser = async (req, res) => {
   }
 };
 
-const getLikeById = async (req, res) => {
+const getLikeRes = async (req, res) => {
   try {
-    const { id } = req.params;
-    const data = await model.user.findOne({
+    const {user_id, res_id} = req.body;
+    let likeModel = {
+      user_id,
+      res_id,
+  }
+    const data = await model.like_res.findOne({
       where: {
-        user_id: id,
-      },
-      include: ["res_id_restaurants"]
+        user_id,
+        res_id
+      }
     });
-    if (data) {
-      return successCode(res, "Get user by id successful", data);
+    if (!data) {
+      await model.like_res.create(likeModel);
+      return successCode(res, "Get like Res successful");
     } else {
-      return failCode(res, "User not found!"); 
+      await model.like_res.destroy({
+        where: {user_id, res_id},
+      });
+      return successCode(res, "Unlike Res successful");
     }
   } catch (err) {
     console.log(err);
@@ -150,80 +158,124 @@ const getLikeById = async (req, res) => {
   }
 };
 
-const getRateById = async (req, res) => {
+const getLikeByRes = async (req, res) => {
   try {
-    const { id } = req.params;
-    const data = await model.user.findAll({
-      include: ["res_id_restaurant_rate_res"],
-    });
+      const {id} = req.params;
 
-    if (data) return successCode(res, "Get data successful", data);
-    else return failCode(res, "Data not found!");
-  } catch (error) {
-    console.log(error);
-    return errorCode(res);
-  }
-};
-
-const orderFoodfromUser = async (req, res) => {
-  // Lấy data từ font end
-  const { user_id, food_id, amount = 1, code, arrSubId } = req.body;
-
-  // Gộp 2 primaryKey lại dễ sử dụng và dễ quản lý
-  const orderCol = {
-    food_id,
-    user_id,
+      const data = await model.like_res.findAll({
+          where: {res_id: id}
+      })
+      if (data.length === 0) {
+        return failCode(res, "No likes found for this restaurant");
+      } else {
+        return successCode(res, "Get list Like by Res successful", data);
+      }
+    } catch (err) {
+      console.log(err);
+      return errorCode(res);
+    }
   };
 
-  // Kiểm tra user có tồn tại không?
+
+
+const getLikeByUser = async (req, res) => {
   try {
-    const userExists = await model.user.findOne({
-      where: {
-        user_id,
-      },
-    });
+      const {id} = req.params;
 
-    // Kiểm tra food có tồn tại không?
-    const foodExists = await model.food.findOne({
-      where: {
-        food_id,
-      },
-    });
+      const data = await model.like_res.findAll({
+          where: {user_id: id}
+      })
 
-    // Nếu user và food tồn tại thì thêm data vào CSDL
-    if (userExists && foodExists) {
-      const orderModel = {
-        ...orderCol,
-        ...(amount && { amount }),
-        ...(code && { code }),
-        ...(arrSubId && { arr_sub_id: arrSubId }),
-      };
-
-      // Kiểm tra order có tồn tại không?
-      const orderExists = await model.order.findOne({ where: orderCol });
-
-      // Nếu order tồn tại thì update chưa thì create
-      if (orderExists) {
-        await model.order.update(
-          {
-            ...orderModel,
-            ...(amount && { amount: orderExists.amount + amount }),
-          },
-          { where: orderCol }
-        );
+      if (data.length === 0) {
+        return failCode(res, "No likes found for this user"); 
       } else {
-        await model.order.create(orderModel);
+        return successCode(res, "Get Like by User successful", data); 
       }
-      return successCode(res, "Order food successfully");
-    } else {
-      return failCode(res, "User or food not found!");
+    } catch (err) {
+      console.log(err);
+      return errorCode(res);
     }
-  } catch (error) {
-    console.log(error);
+  };
+
+
+const getRateRes = async (req, res) => {
+  try {
+      const { user_id, res_id, amount } = req.body;
+
+      const rateModel = {
+          user_id,
+          res_id,
+          amount
+      }
+
+      const data = await model.rate_res.findOne({
+        where: {
+          user_id,
+          res_id
+        }
+      });
+
+      if (!data) {
+        await model.rate_res.create(rateModel);
+        return successCode(res,"Res has been rated",rateModel)
+      } else {
+        await model.rate_res.update(rateModel, {
+          where: {
+            user_id,
+            res_id
+          }
+        });
+        return successCode(res,"Res has been updated",rateModel)
+      }
+
+  } catch (err) {
+    console.log(err);
     return errorCode(res);
   }
-};
+}
+
+
+const getRateByRes = async (req, res) => {
+  try {
+      const { id } = req.params;
+
+      const data = await model.rate_res.findAll({
+          where: { res_id: id }
+      });
+
+      if (data.length === 0) {
+        return failCode(res, "No rates found for this restaurant");
+      } else {
+        return successCode(res, "List of rates by restaurant retrieved successfully", data);
+      }
+    } catch (err) {
+      console.log(err);
+      return errorCode(res);
+    }
+  };
+
+
+const getRateByUser = async (req, res) => {
+  try {
+      const { id } = req.params;
+
+      const data = await model.rate_res.findAll({
+          where: { user_id: id }
+      })
+
+      if (data.length === 0) {
+        return failCode(res, "No rates found for this user");
+      } else {
+        return successCode(res, "List of rates by user retrieved successfully", data);
+      }
+    } catch (err) {
+      console.log(err);
+      return errorCode(res);
+    }
+  };
+
 
 module.exports = {
-  getUser,getUserById,getLikeById,getRateById,createUser,deleteUser,updateUser,loginUser,orderFoodfromUser
+  getUser,getUserById,getLikeRes,createUser,deleteUser,updateUser,loginUser,getLikeByRes,getLikeByUser,getRateRes,getRateByRes,getRateByUser
 }
+
