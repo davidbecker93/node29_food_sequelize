@@ -15,14 +15,6 @@ userRouter.post('/rate', getRateRes);
 userRouter.get('/rate-rest/:id', getRateByRes);
 userRouter.get('/rate-user/:id', getRateByUser);
 
-// Fix: changed all post requests to get requests
-// userRouter.get('/like', getLikeRes);
-// userRouter.get('/like-rest/:id', getLikeByRes);
-// userRouter.get('/like-user/:id', getLikeByUser);
-// userRouter.get('/rate', getRateRes);
-// userRouter.get('/rate-rest/:id', getRateByRes);
-// userRouter.get('/rate-user/:id', getRateByUser);
-
 
 
 
