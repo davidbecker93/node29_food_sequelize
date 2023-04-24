@@ -150,6 +150,35 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "order",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"user_id\":1,\r\n    \"food_id\":1,\r\n    \"amount\":3,\r\n    \"code\":\"code1\",\r\n    \"arrSubId\":\"[1,2]\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/api/rest/order",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"rest",
+						"order"
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }
